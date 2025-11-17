@@ -52,6 +52,12 @@ jobs:
           # Fix worker.js import paths
           sed -i 's|from "../output/|from "./output/|g' .svelte-kit/pages-deploy/_worker.js
           sed -i 's|from "../cloudflare-tmp/|from "./cloudflare-tmp/|g' .svelte-kit/pages-deploy/_worker.js
+          
+          # Create wrangler.toml for Pages with nodejs_compat flag
+          cat > .svelte-kit/pages-deploy/wrangler.toml << 'EOF'
+          compatibility_date = "2024-12-01"
+          compatibility_flags = ["nodejs_compat"]
+          EOF
       
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
