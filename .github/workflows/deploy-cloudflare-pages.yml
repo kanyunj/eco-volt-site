@@ -32,6 +32,26 @@ jobs:
         # env:
         #   VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
       
+      - name: Configure Cloudflare Pages project
+        run: |
+          # Update Pages project to enable nodejs_compat compatibility flag
+          curl -X PATCH \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/evd-site" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "deployment_configs": {
+                "production": {
+                  "compatibility_date": "2024-12-01",
+                  "compatibility_flags": ["nodejs_compat"]
+                },
+                "preview": {
+                  "compatibility_date": "2024-12-01",
+                  "compatibility_flags": ["nodejs_compat"]
+                }
+              }
+            }' || echo "Note: Project configuration update may have failed, but deployment will continue"
+      
       - name: Prepare Pages deployment structure
         run: |
           # Create deployment directory
@@ -52,12 +72,6 @@ jobs:
           # Fix worker.js import paths
           sed -i 's|from "../output/|from "./output/|g' .svelte-kit/pages-deploy/_worker.js
           sed -i 's|from "../cloudflare-tmp/|from "./cloudflare-tmp/|g' .svelte-kit/pages-deploy/_worker.js
-          
-          # Create wrangler.toml for Pages with nodejs_compat flag
-          cat > .svelte-kit/pages-deploy/wrangler.toml << 'EOF'
-          compatibility_date = "2024-12-01"
-          compatibility_flags = ["nodejs_compat"]
-          EOF
       
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
