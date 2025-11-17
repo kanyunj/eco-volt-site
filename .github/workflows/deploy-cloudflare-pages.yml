@@ -11,6 +11,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Cloudflare Pages
+    permissions:
+      contents: read
+      deployments: write
     steps:
       - uses: actions/checkout@v4
       
@@ -57,8 +60,5 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: evd-site
           directory: .svelte-kit/pages-deploy
-          # Optional: Set production branch
-          # production: true
-          # Optional: Set git commit info
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
