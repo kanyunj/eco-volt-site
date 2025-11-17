@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	color-scheme: light;
+	font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+	@apply bg-slate-50 text-slate-900 antialiased;
+}
+
+a {
+	@apply transition-colors;
+}
+
+.scroll-motion {
+	opacity: 0;
+	transform: translateY(var(--motion-offset, 40px)) scale(0.975);
+	transition:
+		transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 0.7s ease;
+	will-change: transform, opacity;
+}
+
+.scroll-motion.is-visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+}
+
+.magnetic-btn {
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+	will-change: transform;
+}
+
+.magnetic-btn:focus-visible {
+	@apply outline-none ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900;
+}
+
+.media-card {
+	position: relative;
+	overflow: hidden;
+	border-radius: 1.5rem;
+	border: 1px solid rgb(226 232 240);
+	background-color: rgb(15 23 42);
+}
+
+.media-card::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, rgba(15, 23, 42, 0) 10%, rgba(15, 23, 42, 0.75) 100%);
+	pointer-events: none;
+}
+
+.media-card img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.media-overlay {
+	position: absolute;
+	inset: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	z-index: 1;
+	color: rgb(226 232 240);
+}
+
+.media-caption {
+	position: absolute;
+	left: 1.25rem;
+	right: 1.25rem;
+	bottom: 1.25rem;
+	z-index: 1;
+	color: rgb(241 245 249);
+}
+
+.media-caption p {
+	letter-spacing: 0.3em;
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	color: rgba(248, 250, 252, 0.75);
+}
+
+.media-caption strong {
+	display: block;
+	margin-top: 0.35rem;
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.surface-card {
+	--card-border: rgba(255, 255, 255, 0.7);
+	--card-bg: #fff;
+	@apply rounded-2xl;
+	position: relative;
+	border: 1px solid var(--card-border);
+	background: linear-gradient(180deg, var(--card-bg) 0%, #f8fafc 100%);
+	/* Stronger, layered elevation for clear separation on slate-50 background */
+	box-shadow:
+		0 12px 28px -12px rgba(15, 23, 42, 0.20),
+		0 32px 88px -32px rgba(15, 23, 42, 0.35);
+}
+
+.surface-card--emerald {
+	--card-border: rgba(16, 185, 129, 0.45);
+	--card-bg: rgb(236 253 245);
+}
+
+/* Subtle top highlight to increase perceived elevation */
+.surface-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 40%);
+	pointer-events: none;
+	opacity: 0.7;
+}
+

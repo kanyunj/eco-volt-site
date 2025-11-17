@@ -1,0 +1,64 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Pages
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+        env:
+          # Add any build-time environment variables here
+          # VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
+      
+      - name: Prepare Pages deployment structure
+        run: |
+          # Create deployment directory
+          mkdir -p .svelte-kit/pages-deploy
+          
+          # Copy client files to root
+          cp -r .svelte-kit/cloudflare/client/* .svelte-kit/pages-deploy/
+          
+          # Copy worker.js as _worker.js
+          cp .svelte-kit/cloudflare/worker.js .svelte-kit/pages-deploy/_worker.js
+          
+          # Copy output directory (needed for worker imports)
+          cp -r .svelte-kit/output .svelte-kit/pages-deploy/output
+          
+          # Copy cloudflare-tmp directory (needed for manifest)
+          cp -r .svelte-kit/cloudflare-tmp .svelte-kit/pages-deploy/cloudflare-tmp
+          
+          # Fix worker.js import paths
+          sed -i 's|from "../output/|from "./output/|g' .svelte-kit/pages-deploy/_worker.js
+          sed -i 's|from "../cloudflare-tmp/|from "./cloudflare-tmp/|g' .svelte-kit/pages-deploy/_worker.js
+      
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: evd-site
+          directory: .svelte-kit/pages-deploy
+          # Optional: Set production branch
+          # production: true
+          # Optional: Set git commit info
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+

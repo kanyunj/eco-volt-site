@@ -1,0 +1,29 @@
+name = "evd-site"
+account_id = "eb8aad565e3bfef48fdeade9d8b2c3ea"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+main = ".svelte-kit/cloudflare/worker.js"
+
+[assets]
+directory = ".svelte-kit/cloudflare/client"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "df3b68d9be864c3fa22a49a069dcb0b5"
+preview_id = "b151950bbfb5441ea26aac613b3a208d"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "evd-submissions"
+database_id = "0a438188-4c54-4381-9b26-6a610e7f30ea"
+
+[vars]
+# MailChannels - Update these with your actual email addresses
+# Note: Secrets like TURNSTILE_SECRET and ADMIN_PASSWORD should be set via Cloudflare Dashboard
+MAIL_FROM = "no-reply@yourdomain.com"
+MAIL_TO = "hello@ecovoltdynamics.com"
+
+# VITE_TURNSTILE_SITEKEY must be set before build (use .env.production or build env vars)
+# TURNSTILE_SECRET and ADMIN_PASSWORD should be set as secrets in Cloudflare Dashboard
+
