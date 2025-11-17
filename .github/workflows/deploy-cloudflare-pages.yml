@@ -25,9 +25,9 @@ jobs:
       
       - name: Build project
         run: npm run build
-        env:
-          # Add any build-time environment variables here
-          # VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
+        # Add any build-time environment variables here if needed:
+        # env:
+        #   VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
       
       - name: Prepare Pages deployment structure
         run: |
