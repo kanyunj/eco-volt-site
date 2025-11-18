@@ -105,11 +105,6 @@
 			
 			<h2 class="text-lg font-semibold text-slate-900">About you</h2>
 			
-			<!-- Cloudflare Turnstile widget (only if site key is available) -->
-			{#if turnstileSiteKey}
-				<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
-			{/if}
-			
 			<div class="grid gap-4 md:grid-cols-2">
 				<label class="text-sm font-medium text-slate-900">
 					<span class="mb-1 block">Full name</span>
@@ -161,6 +156,11 @@
 			>
 				{status === 'submitting' ? 'Sending...' : 'Send details'}
 			</button>
+
+			<!-- Cloudflare Turnstile widget (only if site key is available) -->
+			{#if turnstileSiteKey}
+				<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+			{/if}
 
 			{#if status === 'submitted'}
 				<p class="text-center text-sm text-emerald-600 font-medium" aria-live="polite">Thanks! We'll review and get in touch shortly.</p>
