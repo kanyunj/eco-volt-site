@@ -103,12 +103,12 @@
 			<!-- Timing field -->
 			<input type="hidden" name="ts" value={ts} />
 			
+			<h2 class="text-lg font-semibold text-slate-900">About you</h2>
+			
 			<!-- Cloudflare Turnstile widget (only if site key is available) -->
 			{#if turnstileSiteKey}
 				<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
 			{/if}
-			
-			<h2 class="text-lg font-semibold text-slate-900">About you</h2>
 			
 			<div class="grid gap-4 md:grid-cols-2">
 				<label class="text-sm font-medium text-slate-900">
