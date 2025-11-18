@@ -110,7 +110,7 @@
 	</div>
 </section>
 
-<section class="mx-auto max-w-6xl px-4 py-12 md:py-16" use:scrollMotion={{ hysteresis: true }}>
+<section class="mx-auto max-w-6xl px-4 py-12 md:py-16" use:scrollMotion={{ once: false, hideOnExit: true }}>
 	<div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
 		<div>
 			<h2 class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Happy Experiences</h2>
