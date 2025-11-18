@@ -12,6 +12,14 @@
 	] as const;
 
 	let { children } = $props();
+	
+	let menuDetails: HTMLDetailsElement;
+	
+	function closeMenu() {
+		if (menuDetails) {
+			menuDetails.open = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -47,18 +55,18 @@
 			</div>
 
 			<div class="flex items-center gap-2 md:hidden text-sm">
-				<details class="relative">
+				<details bind:this={menuDetails} class="relative z-50">
 					<summary class="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-slate-700 hover:border-slate-400">
 						Menu
 					</summary>
-					<div class="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-3 shadow-card">
+					<div class="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-3 shadow-card z-50">
 						<div class="flex flex-col gap-2">
 							{#each navLinks as link}
-								<a href={link.href} class="text-slate-600 hover:text-slate-900">
+								<a href={link.href} onclick={closeMenu} class="text-slate-600 hover:text-slate-900">
 									{link.label}
 								</a>
 							{/each}
-							<a href="/contact" class="text-emerald-600 font-medium hover:text-emerald-700">
+							<a href="/contact" onclick={closeMenu} class="text-emerald-600 font-medium hover:text-emerald-700">
 								Request a Quote
 							</a>
 						</div>
