@@ -109,6 +109,7 @@
 			{/if}
 			
 			<div class="grid gap-4 md:grid-cols-2">
+				<h3 class="text-lg font-semibold text-slate-900">Personal information</h3>Tell us more..
 				<label class="text-sm font-medium text-slate-900">
 					<span class="mb-1 block">Full name</span>
 					<input class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 focus:border-emerald-500 focus:outline-none" name="name" required />
