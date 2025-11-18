@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { magnetic } from '$lib';
+	import { goto } from '$app/navigation';
 
 	const navLinks = [
 		{ href: '/', label: 'Home' },
@@ -15,10 +16,15 @@
 	
 	let menuDetails: HTMLDetailsElement;
 	
-	function closeMenu() {
+	function handleMenuClick(href: string, event: MouseEvent) {
+		event.preventDefault();
 		if (menuDetails) {
 			menuDetails.open = false;
 		}
+		// Small delay to ensure menu closes before navigation
+		setTimeout(() => {
+			goto(href);
+		}, 100);
 	}
 </script>
 
@@ -62,13 +68,19 @@
 					<div class="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-3 shadow-card z-50">
 						<div class="flex flex-col gap-2">
 							{#each navLinks as link}
-								<a href={link.href} onclick={closeMenu} class="text-slate-600 hover:text-slate-900">
+								<button 
+									onclick={(e) => handleMenuClick(link.href, e)} 
+									class="text-left text-slate-600 hover:text-slate-900"
+								>
 									{link.label}
-								</a>
+								</button>
 							{/each}
-							<a href="/contact" onclick={closeMenu} class="text-emerald-600 font-medium hover:text-emerald-700">
+							<button 
+								onclick={(e) => handleMenuClick('/contact', e)} 
+								class="text-left text-emerald-600 font-medium hover:text-emerald-700"
+							>
 								Request a Quote
-							</a>
+							</button>
 						</div>
 					</div>
 				</details>
