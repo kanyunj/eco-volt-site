@@ -41,7 +41,14 @@ Add these variables for the **Production** environment:
 
 - **Variable name:** `VITE_TURNSTILE_SITEKEY` (for build-time)
   - **Value:** Your Cloudflare Turnstile site key (the public one)
-  - **Note:** This needs to be available at build time, so you may need to set it in GitHub Actions secrets if deploying via CI/CD
+  - **IMPORTANT:** This MUST be set as a **GitHub Secret** (not a variable) for deployments via GitHub Actions:
+    1. Go to your GitHub repository: https://github.com/kanyunj/eco-volt-site
+    2. Click **Settings** → **Secrets and variables** → **Actions**
+    3. Click **New repository secret**
+    4. Name: `VITE_TURNSTILE_SITEKEY` (exact match, case-sensitive)
+    5. Value: Your Turnstile Site Key (starts with something like `0x...` or similar)
+    6. Click **Add secret**
+  - **Note:** This is a build-time variable, so it must be in GitHub Secrets (not Cloudflare Pages variables) when using GitHub Actions for deployment
 
 ### 3. Set D1 Database Binding
 

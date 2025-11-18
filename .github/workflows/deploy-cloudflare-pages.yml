@@ -27,7 +27,18 @@ jobs:
         run: npm ci
       
       - name: Build project
-        run: npm run build
+        run: |
+          echo "Building project..."
+          if [ -z "$VITE_TURNSTILE_SITEKEY" ]; then
+            echo "⚠️  WARNING: VITE_TURNSTILE_SITEKEY is empty or not set!"
+            echo "The Turnstile widget will not render. Please verify:"
+            echo "1. Go to: https://github.com/kanyunj/eco-volt-site/settings/secrets/actions"
+            echo "2. Ensure 'VITE_TURNSTILE_SITEKEY' exists as a Secret (not Variable)"
+            echo "3. The name must match exactly (case-sensitive)"
+          else
+            echo "✅ VITE_TURNSTILE_SITEKEY is set and will be included in build"
+          fi
+          npm run build
         env:
           VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
       
