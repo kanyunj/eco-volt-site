@@ -33,7 +33,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-	<header class="border-b border-slate-100 bg-white/80 backdrop-blur">
+	<header class="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-50">
 		<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 			<a href="/" class="flex items-center gap-3">
 				<div class="h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-lg">
@@ -60,12 +60,12 @@
 				</a>
 			</div>
 
-			<div class="flex items-center gap-2 md:hidden text-sm">
-				<details bind:this={menuDetails} class="relative z-50">
-					<summary class="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-slate-700 hover:border-slate-400">
+			<div class="flex items-center gap-2 md:hidden text-sm relative z-[60]">
+				<details bind:this={menuDetails} class="relative">
+					<summary class="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-slate-700 hover:border-slate-400 relative z-[60]">
 						Menu
 					</summary>
-					<div class="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-3 shadow-card z-50">
+					<div class="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-3 shadow-card z-[60]">
 						<div class="flex flex-col gap-2">
 							{#each navLinks as link}
 								<button 
