@@ -6,6 +6,7 @@ const DAY = 24 * 60 * 60;
 
 type Env = {
 	TURNSTILE_SECRET?: string;
+	EMAILIT_API_KEY?: string;
 	MAIL_FROM?: string;
 	MAIL_TO?: string;
 	RATE_LIMIT?: KVNamespace;
@@ -46,22 +47,39 @@ async function rateLimit(env: Env, ip: string) {
 }
 
 async function sendEmail(env: Env, subject: string, text: string, html: string) {
+	if (!env.EMAILIT_API_KEY) return { ok: false, reason: 'EmailIt API key not configured' };
 	if (!env.MAIL_FROM || !env.MAIL_TO) return { ok: false, reason: 'Email not configured' };
+	
+	// Format from address: "Name <email@domain.com>" or "email@domain.com"
+	const fromAddress = env.MAIL_FROM.includes('<') 
+		? env.MAIL_FROM 
+		: `Eco Volt Website <${env.MAIL_FROM}>`;
+	
 	const payload = {
-		personalizations: [{ to: [{ email: env.MAIL_TO }] }],
-		from: { email: env.MAIL_FROM, name: 'Eco Volt Website' },
+		from: fromAddress,
+		to: env.MAIL_TO,
+		reply_to: env.MAIL_FROM,
 		subject,
-		content: [
-			{ type: 'text/plain', value: text },
-			{ type: 'text/html', value: html }
-		]
+		html,
+		text
 	};
-	const res = await fetch('https://api.mailchannels.net/tx/v1/send', {
+	
+	const res = await fetch('https://api.emailit.com/v1/emails', {
 		method: 'POST',
-		headers: { 'content-type': 'application/json' },
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${env.EMAILIT_API_KEY}`
+		},
 		body: JSON.stringify(payload)
 	});
-	return { ok: res.ok };
+	
+	if (!res.ok) {
+		const errorText = await res.text().catch(() => 'Unknown error');
+		console.error('EmailIt API error:', res.status, errorText);
+		return { ok: false, reason: `EmailIt API error: ${res.status} ${errorText}` };
+	}
+	
+	return { ok: true };
 }
 
 export const POST: RequestHandler = async ({ request, getClientAddress, platform }) => {
