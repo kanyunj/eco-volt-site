@@ -108,7 +108,7 @@
 				<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
 			{/if}
 			
-			<h2 class="text-lg font-semibold text-slate-900">Or get in touch directly</h2>
+			<h2 class="text-lg font-semibold text-slate-900">About you</h2>
 			
 			<div class="grid gap-4 md:grid-cols-2">
 				<label class="text-sm font-medium text-slate-900">
