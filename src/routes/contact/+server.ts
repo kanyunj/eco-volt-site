@@ -113,6 +113,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress, platform
 	}
 
 	// Persist to D1 if available
+	let dbSuccess = false;
 	try {
 		if (env.DB) {
 			await env.DB.prepare(
@@ -128,15 +129,22 @@ export const POST: RequestHandler = async ({ request, getClientAddress, platform
 					user_agent TEXT
 				);`
 			).run();
-			await env.DB.prepare(
+			const result = await env.DB.prepare(
 				`INSERT INTO submissions (created_at, name, email, phone, project_type, message, ip, user_agent)
 				 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 			)
 				.bind(new Date().toISOString(), name, email, phone, projectType, message, ip, ua)
 				.run();
+			dbSuccess = result.success;
+			if (!result.success) {
+				console.error('D1 insert failed:', result.error);
+			}
+		} else {
+			console.warn('D1 database not available');
 		}
-	} catch {
-		// swallow storage errors for now
+	} catch (error) {
+		console.error('D1 storage error:', error);
+		// Continue even if D1 fails - email is more important
 	}
 
 	// Email action
@@ -157,8 +165,15 @@ ${message}`;
 <p><strong>Message</strong><br/>${message.replace(/\n/g, '<br/>')}</p>
 <hr/><p style="color:#64748b;font-size:12px">IP: ${ip}<br/>UA: ${ua}</p>`;
 
-	await sendEmail(env, subject, text, html);
+	const emailResult = await sendEmail(env, subject, text, html);
+	
+	if (!emailResult.ok) {
+		console.error('Email send failed:', emailResult.reason);
+		// Return error if email fails (it's critical)
+		return new Response(`Email failed: ${emailResult.reason || 'Unknown error'}`, { status: 500 });
+	}
 
+	// Return success even if D1 failed (email is more critical)
 	return new Response('OK', { status: 200 });
 };
 
