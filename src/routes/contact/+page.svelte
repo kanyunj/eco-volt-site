@@ -16,9 +16,21 @@
 	onMount(async () => {
 		ts = Date.now();
 		
+		// Debug: Log if site key is available
+		if (typeof window !== 'undefined') {
+			if (!turnstileSiteKey) {
+				console.warn('VITE_TURNSTILE_SITEKEY is not set. Turnstile widget will not render.');
+			} else {
+				console.log('Turnstile site key found, initializing widget...');
+			}
+		}
+		
 		// Initialize Turnstile widget if site key is available
 		if (turnstileSiteKey && typeof window !== 'undefined') {
 			await tick(); // Wait for DOM to be ready
+			
+			let retryCount = 0;
+			const maxRetries = 50; // 5 seconds max wait time
 			
 			const initTurnstile = () => {
 				if ((window as any).turnstile && turnstileContainer) {
@@ -27,21 +39,28 @@
 							sitekey: turnstileSiteKey,
 							callback: (token: string) => {
 								turnstileReady = true;
+								console.log('Turnstile widget ready');
 							},
 							'error-callback': () => {
 								turnstileReady = false;
 								console.error('Turnstile error');
 							}
 						});
+						console.log('Turnstile widget rendered successfully');
 					} catch (error) {
 						console.error('Failed to render Turnstile:', error);
 					}
-				} else if ((window as any).turnstile && !turnstileContainer) {
-					// Container not ready yet, retry
-					setTimeout(initTurnstile, 100);
+				} else if (retryCount < maxRetries) {
+					retryCount++;
+					if (!(window as any).turnstile) {
+						// Script not loaded yet, retry
+						setTimeout(initTurnstile, 100);
+					} else if (!turnstileContainer) {
+						// Container not ready yet, retry
+						setTimeout(initTurnstile, 100);
+					}
 				} else {
-					// Script not loaded yet, retry
-					setTimeout(initTurnstile, 100);
+					console.error('Failed to initialize Turnstile widget after max retries');
 				}
 			};
 			

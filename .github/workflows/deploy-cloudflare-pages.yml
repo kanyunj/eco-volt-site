@@ -28,9 +28,8 @@ jobs:
       
       - name: Build project
         run: npm run build
-        # Add any build-time environment variables here if needed:
-        # env:
-        #   VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
+        env:
+          VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
       
       - name: Configure Cloudflare Pages project
         run: |
