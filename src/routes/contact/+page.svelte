@@ -1,31 +1,86 @@
 <script lang="ts">
 	import { magnetic, scrollMotion } from '$lib';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	let status: 'idle' | 'submitting' | 'submitted' | 'error' = 'idle';
 	let errorMessage = '';
 	let ts = Date.now();
-	onMount(() => {
-		ts = Date.now();
-	});
+	let turnstileWidgetId: string | null = null;
+	let turnstileReady = false;
+	let turnstileContainer: HTMLDivElement | null = null;
 
 	const projectTypes = ['Residential solar + backup', 'Commercial / institutional', 'Backup power only', 'Electrical design & installations', 'Other / not sure'];
 
 	const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITEKEY || '';
 
+	onMount(async () => {
+		ts = Date.now();
+		
+		// Initialize Turnstile widget if site key is available
+		if (turnstileSiteKey && typeof window !== 'undefined') {
+			await tick(); // Wait for DOM to be ready
+			
+			const initTurnstile = () => {
+				if ((window as any).turnstile && turnstileContainer) {
+					try {
+						turnstileWidgetId = (window as any).turnstile.render(turnstileContainer, {
+							sitekey: turnstileSiteKey,
+							callback: (token: string) => {
+								turnstileReady = true;
+							},
+							'error-callback': () => {
+								turnstileReady = false;
+								console.error('Turnstile error');
+							}
+						});
+					} catch (error) {
+						console.error('Failed to render Turnstile:', error);
+					}
+				} else if ((window as any).turnstile && !turnstileContainer) {
+					// Container not ready yet, retry
+					setTimeout(initTurnstile, 100);
+				} else {
+					// Script not loaded yet, retry
+					setTimeout(initTurnstile, 100);
+				}
+			};
+			
+			// Start initialization
+			initTurnstile();
+		}
+	});
+
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
+		
+		// Check if Turnstile is required but not ready
+		if (turnstileSiteKey && !turnstileReady) {
+			status = 'error';
+			errorMessage = 'Please complete the captcha verification';
+			setTimeout(() => {
+				status = 'idle';
+				errorMessage = '';
+			}, 3000);
+			return;
+		}
+		
 		status = 'submitting';
 		errorMessage = '';
 		
 		const form = event.target as HTMLFormElement;
 		const body = new FormData(form);
 		
-		// Ensure Turnstile token is included if widget is present
-		if (turnstileSiteKey && typeof window !== 'undefined') {
+		// Get Turnstile token if widget is present
+		if (turnstileSiteKey && typeof window !== 'undefined' && (window as any).turnstile) {
 			const turnstileInput = form.querySelector('input[name="cf-turnstile-response"]') as HTMLInputElement;
 			if (turnstileInput && turnstileInput.value) {
 				body.append('cf-turnstile-response', turnstileInput.value);
+			} else if (turnstileWidgetId) {
+				// Try to get token from widget
+				const token = (window as any).turnstile.getResponse(turnstileWidgetId);
+				if (token) {
+					body.append('cf-turnstile-response', token);
+				}
 			}
 		}
 
@@ -35,11 +90,9 @@
 			if (res.ok) {
 				form.reset();
 				// Reset Turnstile widget if present
-				if (turnstileSiteKey && typeof window !== 'undefined' && (window as any).turnstile) {
-					const widgetId = (form.querySelector('.cf-turnstile') as HTMLElement)?.dataset?.sitekey;
-					if (widgetId) {
-						(window as any).turnstile.reset();
-					}
+				if (turnstileSiteKey && turnstileWidgetId && typeof window !== 'undefined' && (window as any).turnstile) {
+					(window as any).turnstile.reset(turnstileWidgetId);
+					turnstileReady = false;
 				}
 				status = 'submitted';
 				setTimeout(() => (status = 'idle'), 4000);
@@ -47,6 +100,11 @@
 				const text = await res.text();
 				status = 'error';
 				errorMessage = text || `Error ${res.status}: ${res.statusText}`;
+				// Reset Turnstile on error
+				if (turnstileSiteKey && turnstileWidgetId && typeof window !== 'undefined' && (window as any).turnstile) {
+					(window as any).turnstile.reset(turnstileWidgetId);
+					turnstileReady = false;
+				}
 				setTimeout(() => {
 					status = 'idle';
 					errorMessage = '';
@@ -56,6 +114,11 @@
 			status = 'error';
 			errorMessage = 'Failed to submit. Please try again or contact us directly.';
 			console.error('Form submission error:', err);
+			// Reset Turnstile on error
+			if (turnstileSiteKey && turnstileWidgetId && typeof window !== 'undefined' && (window as any).turnstile) {
+				(window as any).turnstile.reset(turnstileWidgetId);
+				turnstileReady = false;
+			}
 			setTimeout(() => {
 				status = 'idle';
 				errorMessage = '';
@@ -121,7 +184,7 @@
 			
 			<!-- Cloudflare Turnstile widget (only if site key is available) -->
 			{#if turnstileSiteKey}
-				<div class="cf-turnstile mb-5" data-sitekey={turnstileSiteKey}></div>
+				<div bind:this={turnstileContainer} class="mb-5"></div>
 			{/if}
 			
 			<h2 class="text-lg font-semibold text-slate-900 mb-5">About you</h2>
